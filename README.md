@@ -5,6 +5,7 @@
 **Professor:** Edvard  
 **Autor:** Gabriel Lazarini de Lima Ribeiro  
 **Matrícula:** 2024006783  
+**Repositório Oficial (Entrega 2):** [https://github.com/LazariniGab/sistema-barbearia-ecot11a](https://github.com/LazariniGab/sistema-barbearia-ecot11a)  
 
 ---
 
@@ -49,9 +50,11 @@ Conforme especificado nas Seções 7 e 9 do Documento de Software:
 * **Node.js** (versão 18+ ou LTS) e **npm** instalados.
 
 ### 1º Passo: Clonar o repositório e instalar as dependências
-No terminal, dentro da pasta raiz do projeto, execute:
+No terminal, clone o repositório oficial e instale os pacotes (raiz, backend e frontend):
 
 ```bash
+git clone https://github.com/LazariniGab/sistema-barbearia-ecot11a.git
+cd sistema-barbearia-ecot11a
 npm run install:all
 ```
 
