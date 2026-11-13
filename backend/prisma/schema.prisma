@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Classe base Usuario do Diagrama de Classes (Figura 2 / Lab 3)
+// Especializada em Cliente e ProfissionalBarbeiro
+model Usuario {
+  id                  Int              @id @default(autoincrement())
+  nome                String
+  email               String           @unique
+  telefone            String
+  hashSenha           String
+  tipo                String           @default("CLIENTE") // CLIENTE | BARBEIRO | ADMIN
+  
+  // Atributos de Cliente (Herança no Diagrama de Classes)
+  aceiteLGPD          Boolean          @default(false)
+  dataConsentimento   DateTime?
+
+  // Atributos de ProfissionalBarbeiro (Herança no Diagrama de Classes)
+  especialidade       String?
+  horaInicioTurno     String?          @default("09:00")
+  horaFimTurno        String?          @default("19:00")
+  fotoUrl             String?
+  ativo               Boolean          @default(true)
+
+  criadoEm            DateTime         @default(now())
+
+  // Relacionamentos (1 Cliente realiza 0..* Agendamentos; 1 Barbeiro executa 0..* Agendamentos; 1 Barbeiro gerencia 0..* BloqueioAgenda)
+  agendamentosCliente  Agendamento[]    @relation("ClienteAgendamentos")
+  agendamentosBarbeiro Agendamento[]    @relation("BarbeiroAgendamentos")
+  bloqueiosGerenciados BloqueioAgenda[] @relation("BarbeiroBloqueios")
+
+  @@index([tipo, ativo])
+}
+
+// Classe Servico do Diagrama de Classes
+model Servico {
+  id             Int           @id @default(autoincrement())
+  nome           String
+  preco          Float
+  duracaoMinutos Int
+  descricao      String
+  fotoUrl        String?
+  categoria      String        @default("Cabelo")
+  ativo          Boolean       @default(true)
+
+  agendamentos   Agendamento[]
+}
+
+// Classe Agendamento do Diagrama de Classes + Máquina de Estados (Figura 4)
+model Agendamento {
+  id             Int      @id @default(autoincrement())
+  dataHoraInicio DateTime
+  dataHoraFim    DateTime
+  // Estados: CONFIRMADO | EM_ATENDIMENTO | CONCLUIDO | CANCELADO | REMARCADO
+  status         String   @default("CONFIRMADO")
+  dataCriacao    DateTime @default(now())
+  observacoes    String?
+  // Chave auxiliar para garantir RNF02.3 (Atomicidade no banco para reservas ativas no mesmo horário)
+  slotAtivoKey   String?  @unique
+
+  clienteId      Int
+  cliente        Usuario  @relation("ClienteAgendamentos", fields: [clienteId], references: [id], onDelete: Cascade)
+
+  profissionalId Int
+  profissional   Usuario  @relation("BarbeiroAgendamentos", fields: [profissionalId], references: [id], onDelete: Cascade)
+
+  servicoId      Int
+  servico        Servico  @relation(fields: [servicoId], references: [id])
+
+  @@index([profissionalId, dataHoraInicio])
+  @@index([clienteId, status])
+  @@index([dataHoraInicio])
+}
+
+// Classe BloqueioAgenda do Diagrama de Classes
+model BloqueioAgenda {
+  id             Int      @id @default(autoincrement())
+  dataHoraInicio DateTime
+  dataHoraFim    DateTime
+  motivo         String
+
+  profissionalId Int
+  profissional   Usuario  @relation("BarbeiroBloqueios", fields: [profissionalId], references: [id], onDelete: Cascade)
+
+  @@index([profissionalId, dataHoraInicio, dataHoraFim])
+}
+
+// Log de Notificações Externas (Módulo de Integração Externa - Figura 5 / RE01)
+model NotificacaoLog {
+  id           Int      @id @default(autoincrement())
+  destinatario String
+  telefone     String?
+  tipo         String   // CONFIRMACAO | CANCELAMENTO | REMARCACAO | EXCLUSAO_LGPD
+  assunto      String
+  mensagem     String
+  canal        String   @default("EMAIL_API")
+  enviadoEm    DateTime @default(now())
+}

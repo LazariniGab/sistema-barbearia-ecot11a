@@ -1,0 +1,9 @@
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+*.db
+*.db-journal
+.DS_Store
+coverage/
+.vscode/

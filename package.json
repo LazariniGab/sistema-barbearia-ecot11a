@@ -1,0 +1,20 @@
+{
+  "name": "sistema-barbearia-monorepo",
+  "version": "1.0.0",
+  "description": "Sistema de Agendamento e Gestão para Barbearia - ECOT11A UNIFEI",
+  "author": "Gabriel Lazarini de Lima Ribeiro (2024006783)",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && npm --prefix backend install && npm --prefix frontend install",
+    "db:setup": "npm --prefix backend run db:setup",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "test": "npm --prefix backend test",
+    "test:load": "npm --prefix backend run test:load",
+    "build": "npm --prefix frontend run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
